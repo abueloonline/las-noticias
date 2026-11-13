@@ -1,0 +1,1995 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Las Noticias del Abuelo — Edición Digital Automática</title>
+    <style>
+        /* =========================================================
+           1. VARIABLES DE DISEÑO EDITORIAL Y RESET
+           ========================================================= */
+        :root {
+            --paper-bg: #FAF7F2;
+            --paper-card: #FFFFFF;
+            --paper-alt: #F3EDE2;
+            --border-color: #DED5C5;
+            --border-strong: #1A1A1A;
+            --ink-main: #1A1A1A;
+            --ink-muted: #55514B;
+            --ink-light: #767169;
+            --burgundy: #8B1E24;
+            --burgundy-dark: #681318;
+            --gold: #B7791F;
+            --green-live: #15803D;
+            --font-serif: Georgia, 'Times New Roman', Times, serif;
+            --font-sans: system-ui, -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Helvetica, Arial, sans-serif;
+            --shadow-sm: 0 2px 6px rgba(26, 26, 26, 0.06);
+            --shadow-md: 0 8px 20px rgba(26, 26, 26, 0.10);
+            --shadow-lg: 0 16px 36px rgba(26, 26, 26, 0.18);
+            --radius-md: 12px;
+            --radius-lg: 16px;
+        }
+
+        * {
+            box-sizing: border-box;
+            margin: 0;
+            padding: 0;
+        }
+
+        body {
+            background-color: var(--paper-bg);
+            color: var(--ink-main);
+            font-family: var(--font-sans);
+            line-height: 1.55;
+            -webkit-font-smoothing: antialiased;
+            overflow-x: hidden;
+        }
+
+        button, input, select, textarea {
+            font-family: inherit;
+        }
+
+        .container {
+            width: 100%;
+            max-width: 1200px;
+            margin: 0 auto;
+            padding: 0 16px;
+        }
+
+        /* =========================================================
+           2. BARRA SUPERIOR EN VIVO Y CONTROL DE AUTO-PUBLICACIÓN
+           ========================================================= */
+        .top-live-bar {
+            background-color: var(--ink-main);
+            color: #FAF7F2;
+            font-size: 0.82rem;
+            border-bottom: 2px solid var(--burgundy);
+        }
+
+        .top-live-inner {
+            display: flex;
+            flex-wrap: wrap;
+            align-items: center;
+            justify-content: space-between;
+            gap: 10px;
+            padding: 8px 16px;
+            max-width: 1200px;
+            margin: 0 auto;
+        }
+
+        .live-meta {
+            display: flex;
+            flex-wrap: wrap;
+            align-items: center;
+            gap: 10px;
+            color: #E5DFD3;
+        }
+
+        .live-badge {
+            display: inline-flex;
+            align-items: center;
+            gap: 6px;
+            background-color: rgba(21, 128, 61, 0.25);
+            border: 1px solid #22C55E;
+            color: #86EFAC;
+            font-weight: 700;
+            font-size: 0.72rem;
+            padding: 3px 10px;
+            border-radius: 999px;
+            letter-spacing: 0.04em;
+            text-transform: uppercase;
+        }
+
+        .live-badge.paused {
+            background-color: rgba(183, 121, 31, 0.25);
+            border-color: #F59E0B;
+            color: #FDE68A;
+        }
+
+        .pulse-dot {
+            width: 8px;
+            height: 8px;
+            border-radius: 50%;
+            background-color: #22C55E;
+            animation: pulseAnim 1.5s infinite;
+        }
+
+        .live-badge.paused .pulse-dot {
+            background-color: #F59E0B;
+            animation: none;
+        }
+
+        @keyframes pulseAnim {
+            0%, 100% { opacity: 1; transform: scale(1); }
+            50% { opacity: 0.4; transform: scale(0.8); }
+        }
+
+        .auto-controls {
+            display: flex;
+            flex-wrap: wrap;
+            align-items: center;
+            gap: 8px;
+        }
+
+        .countdown-box {
+            background-color: #2B2A27;
+            border: 1px solid #44403C;
+            padding: 4px 10px;
+            border-radius: 999px;
+            font-size: 0.78rem;
+            font-weight: 600;
+        }
+
+        .countdown-box strong {
+            color: #FBBF24;
+        }
+
+        .btn-top {
+            border: none;
+            border-radius: 999px;
+            padding: 6px 12px;
+            font-size: 0.78rem;
+            font-weight: 700;
+            cursor: pointer;
+            transition: transform 0.15s ease, background-color 0.2s ease;
+            display: inline-flex;
+            align-items: center;
+            gap: 5px;
+        }
+
+        .btn-top:active {
+            transform: scale(0.97);
+        }
+
+        .btn-publish-now {
+            background-color: var(--burgundy);
+            color: #FFFFFF;
+        }
+
+        .btn-publish-now:hover {
+            background-color: #A6242B;
+        }
+
+        .btn-pause {
+            background-color: #363430;
+            color: #FAF7F2;
+            border: 1px solid #524E48;
+        }
+
+        .btn-pause:hover {
+            background-color: #4A4640;
+        }
+
+        /* =========================================================
+           3. CABECERA TIPO PERIÓDICO CLÁSICO ARGENTINO
+           ========================================================= */
+        .masthead {
+            background-color: var(--paper-bg);
+            padding: 20px 0 12px;
+            border-bottom: 1px solid var(--border-color);
+        }
+
+        .masthead-grid {
+            display: flex;
+            flex-wrap: wrap;
+            align-items: center;
+            justify-content: space-between;
+            gap: 12px;
+            padding-bottom: 14px;
+            border-bottom: 3px double var(--border-strong);
+        }
+
+        .edition-info {
+            font-size: 0.78rem;
+            color: var(--ink-muted);
+            font-weight: 600;
+            text-transform: uppercase;
+            letter-spacing: 0.05em;
+        }
+
+        .brand-center {
+            text-align: center;
+            flex: 1 1 320px;
+        }
+
+        .brand-kicker {
+            font-size: 0.74rem;
+            text-transform: uppercase;
+            letter-spacing: 0.18em;
+            color: var(--burgundy);
+            font-weight: 800;
+            margin-bottom: 4px;
+        }
+
+        .brand-title {
+            font-family: var(--font-serif);
+            font-size: clamp(2.1rem, 5vw, 3.6rem);
+            font-weight: 900;
+            letter-spacing: -0.02em;
+            line-height: 1.05;
+            color: var(--ink-main);
+        }
+
+        .brand-subtitle {
+            font-family: var(--font-serif);
+            font-style: italic;
+            font-size: 0.95rem;
+            color: var(--ink-muted);
+            margin-top: 4px;
+        }
+
+        .masthead-actions {
+            display: flex;
+            align-items: center;
+            gap: 8px;
+        }
+
+        .btn-editorial {
+            background-color: var(--paper-card);
+            color: var(--ink-main);
+            border: 1px solid var(--border-strong);
+            padding: 8px 14px;
+            border-radius: 999px;
+            font-size: 0.82rem;
+            font-weight: 700;
+            cursor: pointer;
+            transition: all 0.2s ease;
+            display: inline-flex;
+            align-items: center;
+            gap: 6px;
+        }
+
+        .btn-editorial:hover {
+            background-color: var(--ink-main);
+            color: var(--paper-bg);
+        }
+
+        .badge-count {
+            background-color: var(--burgundy);
+            color: #FFFFFF;
+            font-size: 0.72rem;
+            padding: 1px 7px;
+            border-radius: 999px;
+        }
+
+        /* =========================================================
+           4. TICKER DE ÚLTIMO MOMENTO
+           ========================================================= */
+        .ticker-bar {
+            background-color: var(--burgundy);
+            color: #FFFFFF;
+            display: flex;
+            align-items: center;
+            overflow: hidden;
+            border-bottom: 2px solid var(--burgundy-dark);
+        }
+
+        .ticker-label {
+            background-color: var(--burgundy-dark);
+            padding: 8px 14px;
+            font-size: 0.75rem;
+            font-weight: 800;
+            letter-spacing: 0.08em;
+            text-transform: uppercase;
+            white-space: nowrap;
+            z-index: 2;
+        }
+
+        .ticker-track-wrap {
+            overflow: hidden;
+            flex: 1;
+            padding: 7px 12px;
+        }
+
+        .ticker-text {
+            font-size: 0.86rem;
+            font-weight: 600;
+            white-space: nowrap;
+            overflow: hidden;
+            text-overflow: ellipsis;
+            cursor: pointer;
+        }
+
+        .ticker-text:hover {
+            text-decoration: underline;
+        }
+
+        /* =========================================================
+           5. NAVEGACIÓN DE CATEGORÍAS Y BUSCADOR
+           ========================================================= */
+        .nav-section {
+            background-color: var(--paper-alt);
+            border-bottom: 1px solid var(--border-color);
+            padding: 12px 0;
+            position: sticky;
+            top: 0;
+            z-index: 20;
+        }
+
+        .nav-flex {
+            display: flex;
+            flex-wrap: wrap;
+            align-items: center;
+            justify-content: space-between;
+            gap: 12px;
+        }
+
+        .category-tabs {
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            overflow-x: auto;
+            padding-bottom: 2px;
+            max-width: 100%;
+        }
+
+        .cat-tab {
+            background-color: var(--paper-card);
+            color: var(--ink-main);
+            border: 1px solid var(--border-color);
+            padding: 7px 14px;
+            border-radius: 999px;
+            font-size: 0.84rem;
+            font-weight: 700;
+            white-space: nowrap;
+            cursor: pointer;
+            display: inline-flex;
+            align-items: center;
+            gap: 6px;
+            transition: all 0.2s ease;
+        }
+
+        .cat-tab:hover {
+            border-color: var(--ink-main);
+        }
+
+        .cat-tab.active {
+            background-color: var(--ink-main);
+            color: #FFFFFF;
+            border-color: var(--ink-main);
+        }
+
+        .cat-tab .tab-num {
+            background-color: rgba(0, 0, 0, 0.08);
+            padding: 1px 7px;
+            border-radius: 999px;
+            font-size: 0.74rem;
+        }
+
+        .cat-tab.active .tab-num {
+            background-color: rgba(255, 255, 255, 0.22);
+            color: #FFFFFF;
+        }
+
+        .search-box {
+            display: flex;
+            align-items: center;
+            background-color: var(--paper-card);
+            border: 1px solid var(--border-color);
+            border-radius: 999px;
+            padding: 5px 12px;
+            min-width: 220px;
+        }
+
+        .search-box input {
+            border: none;
+            background: transparent;
+            outline: none;
+            font-size: 0.85rem;
+            color: var(--ink-main);
+            width: 100%;
+        }
+
+        /* =========================================================
+           6. PORTADA PRINCIPAL (HERO DESTACADO)
+           ========================================================= */
+        .main-content {
+            padding: 24px 0 48px;
+        }
+
+        .hero-card {
+            background-color: var(--paper-card);
+            border: 1px solid var(--border-color);
+            border-radius: var(--radius-lg);
+            box-shadow: var(--shadow-md);
+            overflow: hidden;
+            display: grid;
+            grid-template-columns: 1.15fr 1fr;
+            margin-bottom: 32px;
+            transition: transform 0.2s ease, box-shadow 0.2s ease;
+        }
+
+        .hero-card:hover {
+            box-shadow: var(--shadow-lg);
+        }
+
+        .hero-art {
+            position: relative;
+            min-height: 280px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            overflow: hidden;
+        }
+
+        .hero-art svg {
+            width: 100%;
+            height: 100%;
+            display: block;
+            object-fit: cover;
+        }
+
+        .hero-badges {
+            position: absolute;
+            top: 14px;
+            left: 14px;
+            display: flex;
+            flex-wrap: wrap;
+            gap: 8px;
+        }
+
+        .hero-body {
+            padding: 26px 28px;
+            display: flex;
+            flex-direction: column;
+            justify-content: space-between;
+            gap: 16px;
+        }
+
+        .hero-kicker {
+            font-size: 0.78rem;
+            font-weight: 800;
+            text-transform: uppercase;
+            letter-spacing: 0.08em;
+            color: var(--burgundy);
+        }
+
+        .hero-title {
+            font-family: var(--font-serif);
+            font-size: clamp(1.5rem, 2.8vw, 2.2rem);
+            font-weight: 800;
+            line-height: 1.18;
+            color: var(--ink-main);
+            margin: 8px 0 12px;
+        }
+
+        .hero-excerpt {
+            font-size: 1rem;
+            color: var(--ink-muted);
+            line-height: 1.6;
+        }
+
+        .grandpa-quote {
+            background-color: var(--paper-alt);
+            border-left: 4px solid var(--gold);
+            padding: 10px 14px;
+            border-radius: 0 8px 8px 0;
+            font-family: var(--font-serif);
+            font-style: italic;
+            font-size: 0.9rem;
+            color: var(--ink-main);
+        }
+
+        .card-footer-row {
+            display: flex;
+            flex-wrap: wrap;
+            align-items: center;
+            justify-content: space-between;
+            gap: 10px;
+            padding-top: 12px;
+            border-top: 1px solid var(--border-color);
+            font-size: 0.8rem;
+            color: var(--ink-light);
+        }
+
+        .btn-read {
+            background-color: var(--ink-main);
+            color: #FFFFFF;
+            border: none;
+            padding: 9px 16px;
+            border-radius: 999px;
+            font-size: 0.84rem;
+            font-weight: 700;
+            cursor: pointer;
+            transition: background-color 0.2s ease;
+        }
+
+        .btn-read:hover {
+            background-color: var(--burgundy);
+        }
+
+        /* =========================================================
+           7. GRILLA DE NOTICIAS Y TARJETAS
+           ========================================================= */
+        .section-header {
+            display: flex;
+            flex-wrap: wrap;
+            align-items: baseline;
+            justify-content: space-between;
+            gap: 8px;
+            border-bottom: 2px solid var(--border-strong);
+            padding-bottom: 8px;
+            margin-bottom: 20px;
+        }
+
+        .section-title {
+            font-family: var(--font-serif);
+            font-size: 1.5rem;
+            font-weight: 800;
+        }
+
+        .news-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(310px, 1fr));
+            gap: 22px;
+        }
+
+        .news-card {
+            background-color: var(--paper-card);
+            border: 1px solid var(--border-color);
+            border-radius: var(--radius-md);
+            box-shadow: var(--shadow-sm);
+            overflow: hidden;
+            display: flex;
+            flex-direction: column;
+            transition: transform 0.2s ease, box-shadow 0.2s ease;
+        }
+
+        .news-card:hover {
+            transform: translateY(-3px);
+            box-shadow: var(--shadow-md);
+        }
+
+        .news-card.is-new-anim {
+            animation: cardSlideIn 0.55s ease-out;
+            border-color: var(--burgundy);
+            box-shadow: 0 0 0 2px rgba(139, 30, 36, 0.22);
+        }
+
+        @keyframes cardSlideIn {
+            from { opacity: 0; transform: translateY(-14px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+
+        .card-art {
+            position: relative;
+            height: 165px;
+            overflow: hidden;
+        }
+
+        .card-art svg {
+            width: 100%;
+            height: 100%;
+            display: block;
+        }
+
+        .card-badges {
+            position: absolute;
+            top: 10px;
+            left: 10px;
+            display: flex;
+            flex-wrap: wrap;
+            gap: 6px;
+        }
+
+        .cat-pill {
+            font-size: 0.7rem;
+            font-weight: 800;
+            text-transform: uppercase;
+            letter-spacing: 0.04em;
+            padding: 4px 10px;
+            border-radius: 999px;
+            color: #FFFFFF;
+            box-shadow: 0 2px 6px rgba(0,0,0,0.25);
+        }
+
+        .pill-argentina { background-color: #0369A1; }
+        .pill-internacional { background-color: #4338CA; }
+        .pill-economia { background-color: #047857; }
+        .pill-tecnologia { background-color: #334155; }
+        .pill-deportes { background-color: #B45309; }
+
+        .new-pill {
+            background-color: #15803D;
+            color: #FFFFFF;
+            font-size: 0.7rem;
+            font-weight: 800;
+            padding: 4px 10px;
+            border-radius: 999px;
+            text-transform: uppercase;
+            letter-spacing: 0.04em;
+        }
+
+        .card-body {
+            padding: 18px;
+            display: flex;
+            flex-direction: column;
+            flex: 1;
+            justify-content: space-between;
+            gap: 14px;
+        }
+
+        .card-meta-top {
+            font-size: 0.76rem;
+            color: var(--ink-light);
+            font-weight: 600;
+            margin-bottom: 6px;
+        }
+
+        .card-title {
+            font-family: var(--font-serif);
+            font-size: 1.22rem;
+            font-weight: 800;
+            line-height: 1.28;
+            color: var(--ink-main);
+            margin-bottom: 8px;
+        }
+
+        .card-excerpt {
+            font-size: 0.9rem;
+            color: var(--ink-muted);
+            line-height: 1.5;
+        }
+
+        /* =========================================================
+           8. MODALES (LECTOR DE NOTAS Y REDACCIÓN AUTOMÁTICA)
+           ========================================================= */
+        .modal-backdrop {
+            position: fixed;
+            inset: 0;
+            background-color: rgba(20, 19, 17, 0.72);
+            display: none;
+            align-items: center;
+            justify-content: center;
+            padding: 16px;
+            z-index: 100;
+            overflow-y: auto;
+        }
+
+        .modal-backdrop.open {
+            display: flex;
+        }
+
+        .modal-dialog {
+            background-color: var(--paper-bg);
+            color: var(--ink-main);
+            width: 100%;
+            max-width: 760px;
+            max-height: 90vh;
+            border-radius: var(--radius-lg);
+            border: 1px solid var(--border-color);
+            box-shadow: var(--shadow-lg);
+            display: flex;
+            flex-direction: column;
+            overflow: hidden;
+        }
+
+        .modal-header {
+            background-color: var(--paper-alt);
+            padding: 14px 20px;
+            border-bottom: 1px solid var(--border-color);
+            display: flex;
+            flex-wrap: wrap;
+            align-items: center;
+            justify-content: space-between;
+            gap: 10px;
+        }
+
+        .reader-tools {
+            display: flex;
+            align-items: center;
+            gap: 8px;
+        }
+
+        .tool-btn {
+            background-color: var(--paper-card);
+            border: 1px solid var(--border-color);
+            color: var(--ink-main);
+            padding: 6px 12px;
+            border-radius: 8px;
+            font-size: 0.82rem;
+            font-weight: 700;
+            cursor: pointer;
+        }
+
+        .tool-btn:hover {
+            background-color: var(--ink-main);
+            color: #FFFFFF;
+        }
+
+        .tool-btn.saved {
+            background-color: var(--gold);
+            color: #FFFFFF;
+            border-color: var(--gold);
+        }
+
+        .btn-close-modal {
+            background-color: var(--burgundy);
+            color: #FFFFFF;
+            border: none;
+            padding: 6px 14px;
+            border-radius: 8px;
+            font-size: 0.84rem;
+            font-weight: 700;
+            cursor: pointer;
+        }
+
+        .modal-scroll {
+            padding: 24px;
+            overflow-y: auto;
+            display: flex;
+            flex-direction: column;
+            gap: 16px;
+        }
+
+        .article-full-title {
+            font-family: var(--font-serif);
+            font-size: clamp(1.5rem, 3vw, 2.15rem);
+            font-weight: 900;
+            line-height: 1.18;
+        }
+
+        .article-full-subtitle {
+            font-size: 1.05rem;
+            color: var(--ink-muted);
+            font-weight: 500;
+        }
+
+        .article-paragraphs {
+            display: flex;
+            flex-direction: column;
+            gap: 14px;
+            font-size: 1.08rem;
+            line-height: 1.75;
+            color: var(--ink-main);
+        }
+
+        /* Formulario de Redacción Automática */
+        .form-group {
+            display: flex;
+            flex-direction: column;
+            gap: 5px;
+            margin-bottom: 12px;
+        }
+
+        .form-group label {
+            font-size: 0.82rem;
+            font-weight: 700;
+            color: var(--ink-main);
+        }
+
+        .form-control {
+            background-color: var(--paper-card);
+            border: 1px solid var(--border-color);
+            border-radius: 8px;
+            padding: 9px 12px;
+            font-size: 0.92rem;
+            color: var(--ink-main);
+            width: 100%;
+        }
+
+        .queue-list {
+            display: flex;
+            flex-direction: column;
+            gap: 10px;
+            margin-top: 10px;
+        }
+
+        .queue-item {
+            background-color: var(--paper-card);
+            border: 1px solid var(--border-color);
+            border-radius: 10px;
+            padding: 12px 14px;
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            gap: 12px;
+        }
+
+        /* =========================================================
+           9. TOAST DE NOTIFICACIÓN SUAVE Y PIE DE PÁGINA
+           ========================================================= */
+        .toast-banner {
+            position: fixed;
+            bottom: 20px;
+            right: 20px;
+            left: 20px;
+            max-width: 420px;
+            margin-left: auto;
+            background-color: var(--ink-main);
+            color: #FAF7F2;
+            border-left: 5px solid #22C55E;
+            padding: 14px 16px;
+            border-radius: 12px;
+            box-shadow: var(--shadow-lg);
+            display: none;
+            align-items: center;
+            justify-content: space-between;
+            gap: 12px;
+            z-index: 120;
+            cursor: pointer;
+        }
+
+        .toast-banner.show {
+            display: flex;
+            animation: cardSlideIn 0.35s ease;
+        }
+
+        .site-footer {
+            background-color: var(--ink-main);
+            color: #D6D0C4;
+            padding: 32px 0;
+            border-top: 4px solid var(--burgundy);
+            font-size: 0.88rem;
+        }
+
+        .footer-inner {
+            display: flex;
+            flex-wrap: wrap;
+            justify-content: space-between;
+            gap: 20px;
+        }
+
+        /* =========================================================
+           10. RESPONSIVE MOBILE-FIRST
+           ========================================================= */
+        @media (max-width: 820px) {
+            .hero-card {
+                grid-template-columns: 1fr;
+            }
+            .hero-art {
+                min-height: 200px;
+            }
+            .hero-body {
+                padding: 20px;
+            }
+            .masthead-grid {
+                justify-content: center;
+                text-align: center;
+            }
+            .search-box {
+                width: 100%;
+            }
+        }
+    </style>
+</head>
+<body>
+
+    <!-- 1. BARRA SUPERIOR EN VIVO Y CONTROL DE AUTO-PUBLICACIÓN -->
+    <div class="top-live-bar">
+        <div class="top-live-inner">
+            <div class="live-meta">
+                <span id="live-badge" class="live-badge">
+                    <span class="pulse-dot"></span>
+                    <span id="live-badge-label">EN VIVO · PUBLICACIÓN AUTOMÁTICA</span>
+                </span>
+                <span id="header-date">Edición del Día · Buenos Aires, Argentina</span>
+            </div>
+
+            <div class="auto-controls">
+                <div class="countdown-box">
+                    Próxima nota en: <strong id="countdown-seconds">15s</strong>
+                </div>
+                <button type="button" class="btn-top btn-publish-now" onclick="publishNextNow()">
+                    ⚡ Publicar ahora
+                </button>
+                <button type="button" id="btn-toggle-auto" class="btn-top btn-pause" onclick="toggleAutoPublish()">
+                    ⏸ Pausar
+                </button>
+            </div>
+        </div>
+    </div>
+
+    <!-- 2. CABECERA TIPO PERIÓDICO CLÁSICO -->
+    <header class="masthead">
+        <div class="container">
+            <div class="masthead-grid">
+                <div class="edition-info">
+                    <div>Año XCIV · N° 34.812</div>
+                    <div id="total-published-label">6 noticias publicadas</div>
+                </div>
+
+                <div class="brand-center">
+                    <div class="brand-kicker">El diario de la familia · Claro, confiable y al instante</div>
+                    <h1 class="brand-title">Las Noticias del Abuelo</h1>
+                    <p class="brand-subtitle">“Para leer con el mate caliente y entender lo que pasa en el país y el mundo”</p>
+                </div>
+
+                <div class="masthead-actions">
+                    <button type="button" class="btn-editorial" onclick="toggleSavedFilter()" id="btn-saved-filter">
+                        ★ Guardadas <span class="badge-count" id="saved-counter">0</span>
+                    </button>
+                    <button type="button" class="btn-editorial" onclick="openQueueModal()">
+                        ✍️ Redacción Automática <span class="badge-count" id="queue-counter">6</span>
+                    </button>
+                </div>
+            </div>
+        </div>
+    </header>
+
+    <!-- 3. TICKER DE ÚLTIMO MOMENTO -->
+    <div class="ticker-bar">
+        <div class="ticker-label">● ÚLTIMO MOMENTO</div>
+        <div class="ticker-track-wrap">
+            <div class="ticker-text" id="ticker-headline" onclick="openHeroArticle()">
+                Modernizan el ramal ferroviario que une el interior productivo con los puertos del litoral argentino
+            </div>
+        </div>
+    </div>
+
+    <!-- 4. BARRA DE CATEGORÍAS Y BUSCADOR -->
+    <nav class="nav-section" aria-label="Secciones del diario">
+        <div class="container nav-flex">
+            <div class="category-tabs" id="category-tabs">
+                <button type="button" class="cat-tab active" data-cat="Todas" onclick="selectCategory('Todas')">
+                    Todas <span class="tab-num" id="count-Todas">6</span>
+                </button>
+                <button type="button" class="cat-tab" data-cat="Noticias de Argentina" onclick="selectCategory('Noticias de Argentina')">
+                    Noticias de Argentina <span class="tab-num" id="count-Noticias de Argentina">2</span>
+                </button>
+                <button type="button" class="cat-tab" data-cat="Noticias internacionales" onclick="selectCategory('Noticias internacionales')">
+                    Noticias internacionales <span class="tab-num" id="count-Noticias internacionales">1</span>
+                </button>
+                <button type="button" class="cat-tab" data-cat="Economía y finanzas" onclick="selectCategory('Economía y finanzas')">
+                    Economía y finanzas <span class="tab-num" id="count-Economía y finanzas">1</span>
+                </button>
+                <button type="button" class="cat-tab" data-cat="Tecnología" onclick="selectCategory('Tecnología')">
+                    Tecnología <span class="tab-num" id="count-Tecnología">1</span>
+                </button>
+                <button type="button" class="cat-tab" data-cat="Deportes" onclick="selectCategory('Deportes')">
+                    Deportes <span class="tab-num" id="count-Deportes">1</span>
+                </button>
+            </div>
+
+            <div class="search-box">
+                <input type="search" id="search-input" placeholder="Buscar titular o tema..." oninput="handleSearch(this.value)">
+            </div>
+        </div>
+    </nav>
+
+    <!-- 5. CONTENIDO PRINCIPAL PRE-RENDERIZADO DESDE EL PRIMER MILISEGUNDO -->
+    <main class="main-content">
+        <div class="container">
+
+            <!-- PORTADA DESTACADA PRE-RENDERIZADA -->
+            <section id="hero-slot" aria-label="Noticia principal">
+                <article class="hero-card">
+                    <div class="hero-art">
+                        <svg viewBox="0 0 400 260" preserveAspectRatio="xMidYMid slice">
+                            <defs>
+                                <linearGradient id="initHeroGrad" x1="0%" y1="0%" x2="100%" y2="100%">
+                                    <stop offset="0%" stop-color="#0C4A6E"/>
+                                    <stop offset="100%" stop-color="#0284C7"/>
+                                </linearGradient>
+                            </defs>
+                            <rect width="400" height="260" fill="url(#initHeroGrad)"/>
+                            <circle cx="200" cy="115" r="38" fill="none" stroke="#FDE047" stroke-width="3"/>
+                            <circle cx="200" cy="115" r="15" fill="#FDE047" opacity="0.9"/>
+                            <line x1="115" y1="70" x2="285" y2="70" stroke="#E0F2FE" stroke-width="4" opacity="0.75"/>
+                            <line x1="115" y1="160" x2="285" y2="160" stroke="#E0F2FE" stroke-width="4" opacity="0.75"/>
+                            <text x="200" y="225" text-anchor="middle" fill="#FFFBEB" font-family="Georgia, serif" font-size="12" letter-spacing="2">
+                                NOTICIAS DE ARGENTINA
+                            </text>
+                        </svg>
+                        <div class="hero-badges">
+                            <span class="cat-pill pill-argentina">Noticias de Argentina</span>
+                            <span class="new-pill">Portada del Día</span>
+                        </div>
+                    </div>
+                    <div class="hero-body">
+                        <div>
+                            <div class="hero-kicker">Edición Central · Redacción Nacional</div>
+                            <h2 class="hero-title">Modernizan el ramal ferroviario que une el interior productivo con los puertos del litoral argentino</h2>
+                            <p class="hero-excerpt">La renovación integral de vías y señalización permitirá reducir los tiempos de carga, abaratar el transporte regional y devolver conectividad a decenas de localidades.</p>
+                        </div>
+                        <div class="grandpa-quote">
+                            “El apunte del Abuelo: Cuando vuelve el tren con fuerza a los pueblos, vuelve el trabajo y la alegría alrededor de cada estación.”
+                        </div>
+                        <div class="card-footer-row">
+                            <span>Por Don Aurelio · 4 min de lectura</span>
+                            <button type="button" class="btn-read" onclick="openArticleModal(1)">Leer nota completa →</button>
+                        </div>
+                    </div>
+                </article>
+            </section>
+
+            <!-- ENCABEZADO DE GRILLA -->
+            <div class="section-header">
+                <h2 class="section-title" id="grid-heading">Últimas noticias publicadas</h2>
+                <span style="font-size: 0.84rem; color: var(--ink-muted);" id="grid-subheading">Mostrando todas las secciones</span>
+            </div>
+
+            <!-- GRILLA DE NOTICIAS PRE-RENDERIZADA -->
+            <section class="news-grid" id="news-grid">
+                <article class="news-card">
+                    <div class="card-art">
+                        <svg viewBox="0 0 320 170" preserveAspectRatio="xMidYMid slice">
+                            <rect width="320" height="170" fill="#312E81"/>
+                            <circle cx="160" cy="85" r="36" fill="none" stroke="#C7D2FE" stroke-width="2.5"/>
+                            <ellipse cx="160" cy="85" rx="16" ry="36" fill="none" stroke="#FFFBEB" stroke-width="2"/>
+                            <line x1="124" y1="85" x2="196" y2="85" stroke="#FFFBEB" stroke-width="2"/>
+                        </svg>
+                        <div class="card-badges">
+                            <span class="cat-pill pill-internacional">Noticias internacionales</span>
+                        </div>
+                    </div>
+                    <div class="card-body">
+                        <div>
+                            <div class="card-meta-top">Por Marta Villalba · 4 min de lectura</div>
+                            <h3 class="card-title">Acuerdo internacional para proteger corredores marítimos e impulsar energías limpias</h3>
+                            <p class="card-excerpt">Más de veinte países firmaron una hoja de ruta conjunta para la cooperación científica y el monitoreo oceánico.</p>
+                        </div>
+                        <div class="card-footer-row">
+                            <span>Hace 12 min</span>
+                            <button type="button" class="btn-read" onclick="openArticleModal(2)">Leer nota completa</button>
+                        </div>
+                    </div>
+                </article>
+
+                <article class="news-card">
+                    <div class="card-art">
+                        <svg viewBox="0 0 320 170" preserveAspectRatio="xMidYMid slice">
+                            <rect width="320" height="170" fill="#064E3B"/>
+                            <polyline points="110,115 145,88 170,98 210,55" fill="none" stroke="#FCD34D" stroke-width="4" stroke-linecap="round"/>
+                        </svg>
+                        <div class="card-badges">
+                            <span class="cat-pill pill-economia">Economía y finanzas</span>
+                        </div>
+                    </div>
+                    <div class="card-body">
+                        <div>
+                            <div class="card-meta-top">Por Cdor. Héctor Bermúdez · 5 min de lectura</div>
+                            <h3 class="card-title">Guía clara para cuidar los ahorros familiares: qué opciones de renta fija ganan terreno</h3>
+                            <p class="card-excerpt">Especialistas explican cómo comparar plazos fijos, letras del Tesoro y fondos comunes con liquidez diaria.</p>
+                        </div>
+                        <div class="card-footer-row">
+                            <span>Hace 24 min</span>
+                            <button type="button" class="btn-read" onclick="openArticleModal(3)">Leer nota completa</button>
+                        </div>
+                    </div>
+                </article>
+
+                <article class="news-card">
+                    <div class="card-art">
+                        <svg viewBox="0 0 320 170" preserveAspectRatio="xMidYMid slice">
+                            <rect width="320" height="170" fill="#1E293B"/>
+                            <rect x="130" y="55" width="60" height="60" rx="10" fill="none" stroke="#93C5FD" stroke-width="2.5"/>
+                            <rect x="146" y="71" width="28" height="28" rx="4" fill="#93C5FD" opacity="0.45"/>
+                        </svg>
+                        <div class="card-badges">
+                            <span class="cat-pill pill-tecnologia">Tecnología</span>
+                        </div>
+                    </div>
+                    <div class="card-body">
+                        <div>
+                            <div class="card-meta-top">Por Clara Méndez · 3 min de lectura</div>
+                            <h3 class="card-title">Asistentes de voz en español: cómo ayudan a resumir trámites y redactar cartas</h3>
+                            <p class="card-excerpt">Herramientas gratuitas permiten dictar con naturalidad y obtener textos claros sin conocimientos técnicos.</p>
+                        </div>
+                        <div class="card-footer-row">
+                            <span>Hace 35 min</span>
+                            <button type="button" class="btn-read" onclick="openArticleModal(4)">Leer nota completa</button>
+                        </div>
+                    </div>
+                </article>
+
+                <article class="news-card">
+                    <div class="card-art">
+                        <svg viewBox="0 0 320 170" preserveAspectRatio="xMidYMid slice">
+                            <rect width="320" height="170" fill="#78350F"/>
+                            <circle cx="160" cy="85" r="34" fill="none" stroke="#FDE68A" stroke-width="2.5"/>
+                            <polygon points="160,66 177,79 170,99 150,99 143,79" fill="none" stroke="#FFFBEB" stroke-width="2.2"/>
+                        </svg>
+                        <div class="card-badges">
+                            <span class="cat-pill pill-deportes">Deportes</span>
+                        </div>
+                    </div>
+                    <div class="card-body">
+                        <div>
+                            <div class="card-meta-top">Por Carlos 'Toto' Domínguez · 3 min de lectura</div>
+                            <h3 class="card-title">La Selección Argentina ultima detalles en Ezeiza con vistas a la próxima doble fecha</h3>
+                            <p class="card-excerpt">El cuerpo técnico probó variantes en el mediocampo y destacó el gran presente de los juveniles convocados.</p>
+                        </div>
+                        <div class="card-footer-row">
+                            <span>Hace 48 min</span>
+                            <button type="button" class="btn-read" onclick="openArticleModal(5)">Leer nota completa</button>
+                        </div>
+                    </div>
+                </article>
+
+                <article class="news-card">
+                    <div class="card-art">
+                        <svg viewBox="0 0 320 170" preserveAspectRatio="xMidYMid slice">
+                            <rect width="320" height="170" fill="#0C4A6E"/>
+                            <circle cx="160" cy="85" r="24" fill="none" stroke="#FDE047" stroke-width="2.5"/>
+                            <circle cx="160" cy="85" r="10" fill="#FDE047"/>
+                        </svg>
+                        <div class="card-badges">
+                            <span class="cat-pill pill-argentina">Noticias de Argentina</span>
+                        </div>
+                    </div>
+                    <div class="card-body">
+                        <div>
+                            <div class="card-meta-top">Por Redacción Federal · 4 min de lectura</div>
+                            <h3 class="card-title">Científicos de Córdoba desarrollan un biofertilizante que mejora el rinde del trigo</h3>
+                            <p class="card-excerpt">El insumo biológico fue probado con éxito en la pampa húmeda y cuida la fertilidad natural del suelo.</p>
+                        </div>
+                        <div class="card-footer-row">
+                            <span>Hace 1 hora</span>
+                            <button type="button" class="btn-read" onclick="openArticleModal(6)">Leer nota completa</button>
+                        </div>
+                    </div>
+                </article>
+            </section>
+        </div>
+    </main>
+
+    <!-- 6. PIE DE PÁGINA -->
+    <footer class="site-footer">
+        <div class="container footer-inner">
+            <div>
+                <h3 style="font-family: var(--font-serif); font-size: 1.35rem; color: #FFFFFF; margin-bottom: 6px;">Las Noticias del Abuelo</h3>
+                <p style="max-width: 460px;">Portal informativo con motor de publicación automática continua. Noticias de Argentina, internacionales, economía, tecnología y deportes explicadas con claridad.</p>
+            </div>
+            <div>
+                <strong style="color: #FBBF24; display: block; margin-bottom: 6px;">Secciones del diario</strong>
+                <div>Noticias de Argentina · Noticias internacionales · Economía y finanzas · Tecnología · Deportes</div>
+            </div>
+        </div>
+    </footer>
+
+    <!-- 7. MODAL LECTOR CÓMODO CON AJUSTE DE LETRA (A- / A+) -->
+    <div class="modal-backdrop" id="reader-modal" onclick="closeModalOnBackdrop(event, 'reader-modal')">
+        <div class="modal-dialog" role="dialog" aria-modal="true" aria-labelledby="modal-article-title">
+            <div class="modal-header">
+                <div class="reader-tools">
+                    <button type="button" class="tool-btn" onclick="changeFontSize(-1)" title="Achicar letra">A-</button>
+                    <button type="button" class="tool-btn" onclick="changeFontSize(1)" title="Agrandar letra">A+</button>
+                    <button type="button" class="tool-btn" id="modal-save-btn" onclick="toggleSaveCurrentArticle()">★ Guardar nota</button>
+                </div>
+                <button type="button" class="btn-close-modal" onclick="closeReaderModal()">✕ Cerrar</button>
+            </div>
+            <div class="modal-scroll">
+                <div id="modal-art-box" style="height: 180px; border-radius: 12px; overflow: hidden;"></div>
+                <div style="display: flex; flex-wrap: wrap; align-items: center; gap: 10px;">
+                    <span class="cat-pill pill-argentina" id="modal-cat-badge">Noticias de Argentina</span>
+                    <span style="font-size: 0.82rem; color: var(--ink-light);" id="modal-meta-info">Por Don Aurelio · 4 min de lectura</span>
+                </div>
+                <h2 class="article-full-title" id="modal-article-title">Título de la noticia</h2>
+                <p class="article-full-subtitle" id="modal-article-subtitle">Bajada de la noticia</p>
+                <div class="grandpa-quote" id="modal-grandpa-quote">“El apunte del Abuelo”</div>
+                <div class="article-paragraphs" id="modal-article-body"></div>
+            </div>
+        </div>
+    </div>
+
+    <!-- 8. MODAL REDACCIÓN AUTOMÁTICA Y COLA DE PUBLICACIÓN -->
+    <div class="modal-backdrop" id="queue-modal" onclick="closeModalOnBackdrop(event, 'queue-modal')">
+        <div class="modal-dialog" role="dialog" aria-modal="true" aria-labelledby="queue-modal-title">
+            <div class="modal-header">
+                <strong id="queue-modal-title" style="font-family: var(--font-serif); font-size: 1.15rem;">✍️ Redacción Automática y Cola de Noticias</strong>
+                <button type="button" class="btn-close-modal" onclick="closeQueueModal()">✕ Cerrar</button>
+            </div>
+            <div class="modal-scroll">
+                <div style="background: var(--paper-alt); padding: 16px; border-radius: 12px; border: 1px solid var(--border-color);">
+                    <h3 style="font-family: var(--font-serif); font-size: 1.05rem; margin-bottom: 10px;">Redactar y publicar una noticia nueva</h3>
+                    <form onsubmit="submitCustomArticle(event)">
+                        <div class="form-group">
+                            <label for="new-art-category">Sección</label>
+                            <select id="new-art-category" class="form-control">
+                                <option value="Noticias de Argentina">Noticias de Argentina</option>
+                                <option value="Noticias internacionales">Noticias internacionales</option>
+                                <option value="Economía y finanzas">Economía y finanzas</option>
+                                <option value="Tecnología">Tecnología</option>
+                                <option value="Deportes">Deportes</option>
+                            </select>
+                        </div>
+                        <div class="form-group">
+                            <label for="new-art-title">Titular</label>
+                            <input type="text" id="new-art-title" class="form-control" placeholder="Ej: Inauguran nuevo centro cultural en el barrio..." required>
+                        </div>
+                        <div class="form-group">
+                            <label for="new-art-summary">Resumen / Desarrollo</label>
+                            <textarea id="new-art-summary" class="form-control" rows="3" placeholder="Escriba aquí el contenido de la noticia..." required></textarea>
+                        </div>
+                        <div style="display: flex; flex-wrap: wrap; gap: 10px;">
+                            <button type="submit" class="btn-read">⚡ Publicar al instante en portada</button>
+                        </div>
+                    </form>
+                </div>
+
+                <div>
+                    <h3 style="font-family: var(--font-serif); font-size: 1.05rem;">Noticias programadas en cola automática (<span id="queue-modal-count">0</span>)</h3>
+                    <div class="queue-list" id="queue-list-container"></div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- 9. NOTIFICACIÓN SUAVE DE NUEVA NOTICIA PUBLICADA -->
+    <div class="toast-banner" id="toast-banner" onclick="openLatestPublishedArticle()">
+        <div>
+            <div style="font-size: 0.72rem; font-weight: 800; color: #86EFAC; text-transform: uppercase;">● Nueva nota publicada automáticamente</div>
+            <div style="font-size: 0.88rem; font-weight: 700; margin-top: 2px;" id="toast-title">Titular recién publicado</div>
+        </div>
+        <span style="font-size: 0.78rem; font-weight: 700; color: #FBBF24; white-space: nowrap;">Leer →</span>
+    </div>
+
+    <!-- =========================================================
+         10. JAVASCRIPT AUTOCONTENIDO Y ROBUSTO
+         ========================================================= -->
+    <script>
+        (function () {
+            "use strict";
+
+            // Banco inicial de 6 noticias publicadas
+            var articles = [
+                {
+                    id: 1,
+                    category: "Noticias de Argentina",
+                    title: "Modernizan el ramal ferroviario que une el interior productivo con los puertos del litoral argentino",
+                    excerpt: "La renovación integral de vías y señalización permitirá reducir los tiempos de carga, abaratar el transporte regional y devolver conectividad a decenas de localidades.",
+                    author: "Por Don Aurelio · Redacción Nacional",
+                    readTime: "4 min de lectura",
+                    timeLabel: "Portada del Día",
+                    isNew: false,
+                    grandpaQuote: "Cuando vuelve el tren con fuerza a los pueblos, vuelve el trabajo y la alegría alrededor de cada estación.",
+                    paragraphs: [
+                        "Con la puesta en marcha de nuevos tramos de vía renovada y sistemas de control digital, el transporte ferroviario de cargas y pasajeros da un paso clave para conectar las economías regionales del país.",
+                        "Según informaron autoridades del sector, las obras abarcaron el recambio de durmientes, el mejoramiento de puentes históricos y la incorporación de locomotoras de mayor eficiencia energética.",
+                        "Intendentes y productores locales destacaron que contar con un ferrocarril confiable alivia el tránsito en las rutas nacionales y devuelve previsibilidad a las pequeñas y medianas empresas del interior."
+                    ]
+                },
+                {
+                    id: 2,
+                    category: "Noticias internacionales",
+                    title: "Acuerdo internacional para proteger corredores marítimos e impulsar energías limpias",
+                    excerpt: "Más de veinte países firmaron una hoja de ruta conjunta para la cooperación científica y el monitoreo oceánico en el Atlántico Sur.",
+                    author: "Por Marta Villalba · Internacionales",
+                    readTime: "4 min de lectura",
+                    timeLabel: "Hace 12 min",
+                    isNew: false,
+                    grandpaQuote: "Cuidar el mar es cuidar la despensa y el clima de las generaciones que vienen detrás nuestro.",
+                    paragraphs: [
+                        "Representantes diplomáticos y centros de investigación oceánica sellaron un convenio multilateral destinado a preservar la biodiversidad marina y compartir datos meteorológicos en tiempo real.",
+                        "El programa contempla el despliegue de boyas inteligentes alimentadas por energía solar que medirán corrientes, temperatura del agua y desplazamiento de cardúmenes.",
+                        "Los especialistas subrayaron que la cooperación científica entre naciones resulta indispensable para anticipar fenómenos climáticos extremos y proteger las costas."
+                    ]
+                },
+                {
+                    id: 3,
+                    category: "Economía y finanzas",
+                    title: "Guía clara para cuidar los ahorros familiares: qué opciones de renta fija ganan terreno",
+                    excerpt: "Especialistas explican cómo comparar plazos fijos tradicionales, letras del Tesoro y fondos comunes de inversión con liquidez diaria.",
+                    author: "Por Cdor. Héctor Bermúdez · Finanzas",
+                    readTime: "5 min de lectura",
+                    timeLabel: "Hace 24 min",
+                    isNew: false,
+                    grandpaQuote: "No ponga todos los huevos en la misma canasta y nunca firme nada que no entienda con claridad.",
+                    paragraphs: [
+                        "Ante un escenario de tasas reales positivas, los pequeños ahorristas vuelven a evaluar instrumentos conservadores para cuidar el poder adquisitivo de sus ingresos.",
+                        "Los especialistas recomiendan diferenciar entre el dinero que se necesitará en el corto plazo —donde los fondos comunes de rescate inmediato ofrecen liquidez diaria— y los excedentes a noventa días o más.",
+                        "Asimismo, aconsejan revisar siempre las comisiones bancarias y operar únicamente a través de entidades reguladas."
+                    ]
+                },
+                {
+                    id: 4,
+                    category: "Tecnología",
+                    title: "Asistentes de voz en español: cómo ayudan a resumir trámites y redactar cartas",
+                    excerpt: "Nuevas herramientas gratuitas permiten dictar con naturalidad y obtener textos claros y ordenados sin conocimientos técnicos previos.",
+                    author: "Por Clara Méndez · Tecnología",
+                    readTime: "3 min de lectura",
+                    timeLabel: "Hace 35 min",
+                    isNew: false,
+                    grandpaQuote: "Es como tener un secretario paciente que pasa en limpio lo que uno le dicta mientras toma unos mates.",
+                    paragraphs: [
+                        "La nueva generación de asistentes digitales dio un salto notable en la comprensión del español rioplatense, permitiendo interactuar de forma natural mediante mensajes de voz.",
+                        "Entre sus usos más prácticos para la vida cotidiana se destacan la redacción de reclamos formales, la explicación sencilla de estudios médicos y la organización de listas de compras.",
+                        "Los expertos recuerdan, sin embargo, que nunca deben compartirse claves bancarias ni datos personales sensibles dentro de estas conversaciones."
+                    ]
+                },
+                {
+                    id: 5,
+                    category: "Deportes",
+                    title: "La Selección Argentina ultima detalles en Ezeiza con vistas a la próxima doble fecha",
+                    excerpt: "El cuerpo técnico probó variantes en el mediocampo y destacó el gran presente de los juveniles convocados para el plantel mayor.",
+                    author: "Por Carlos 'Toto' Domínguez · Deportes",
+                    readTime: "3 min de lectura",
+                    timeLabel: "Hace 48 min",
+                    isNew: false,
+                    grandpaQuote: "Cuando un equipo juega con humildad y compañerismo, la camiseta pesa menos y la pelota corre mejor.",
+                    paragraphs: [
+                        "Con plantel completo y un clima de marcado entusiasmo en el predio de Ezeiza, el seleccionado nacional realizó su práctica formal de fútbol antes de emprender viaje.",
+                        "El entrenador ensayó un esquema equilibrado que combina la experiencia de los referentes históricos con la dinámica de los nuevos talentos que brillan en el fútbol europeo y local.",
+                        "Las entradas para el encuentro de local se agotaron en pocas horas, confirmando una vez más el fervor popular alrededor de la Albiceleste."
+                    ]
+                },
+                {
+                    id: 6,
+                    category: "Noticias de Argentina",
+                    title: "Científicos de Córdoba desarrollan un biofertilizante que mejora el rinde del trigo",
+                    excerpt: "El insumo biológico fue probado con éxito en campos de la pampa húmeda y cuida la fertilidad natural del suelo sin químicos agresivos.",
+                    author: "Por Redacción Federal",
+                    readTime: "4 min de lectura",
+                    timeLabel: "Hace 1 hora",
+                    isNew: false,
+                    grandpaQuote: "Qué orgullo cuando el ingenio de nuestras universidades públicas se convierte en fruto para el campo.",
+                    paragraphs: [
+                        "Un equipo interdisciplinario de microbiólogos e ingenieros agrónomos presentó un tratamiento natural para semillas que potencia la absorción de nutrientes.",
+                        "Los ensayos a campo demostraron incrementos de hasta un 14% en el rendimiento por hectárea, reduciendo al mismo tiempo la necesidad de fertilizantes químicos tradicionales.",
+                        "La iniciativa contó con el acompañamiento de cooperativas agropecuarias que participaron en las pruebas piloto."
+                    ]
+                }
+            ];
+
+            // Cola de noticias que se van publicando automáticamente cada 15 segundos
+            var publishQueue = [
+                {
+                    id: 101,
+                    category: "Economía y finanzas",
+                    title: "Cosecha récord de maíz y girasol impulsa el ingreso de divisas y dinamiza el comercio en el interior",
+                    excerpt: "Las buenas condiciones climáticas permitieron superar las proyecciones iniciales de la bolsa de cereales y reactivan el transporte.",
+                    author: "Por Cdor. Héctor Bermúdez · Finanzas",
+                    readTime: "4 min de lectura",
+                    grandpaQuote: "Cuando al campo le va bien, se mueve el taller del pueblo, el transporte y el comercio de la esquina.",
+                    paragraphs: [
+                        "Los últimos informes agroindustriales confirman que la producción de granos gruesos alcanzará uno de los volúmenes más altos de la década.",
+                        "Este repunte productivo ya se refleja en una mayor demanda de maquinaria agrícola, servicios de logística y actividad comercial en las localidades del interior."
+                    ]
+                },
+                {
+                    id: 102,
+                    category: "Deportes",
+                    title: "El tenis argentino celebra tres clasificados a cuartos de final en el circuito sobre polvo de ladrillo",
+                    excerpt: "Con gran solidez desde el fondo de la cancha, los representantes nacionales avanzaron tras partidos muy disputados.",
+                    author: "Por Carlos 'Toto' Domínguez · Deportes",
+                    readTime: "3 min de lectura",
+                    grandpaQuote: "En el polvo de ladrillo se gana con paciencia, piernas firmes y cabeza fría.",
+                    paragraphs: [
+                        "Una jornada memorable vivió el tenis argentino al colocar a tres de sus principales raquetas entre los ocho mejores del certamen.",
+                        "En encuentros que superaron las dos horas de duración, los jugadores nacionales exhibieron temple en los puntos decisivos."
+                    ]
+                },
+                {
+                    id: 103,
+                    category: "Tecnología",
+                    title: "Cómo activar la verificación en dos pasos en WhatsApp y correo en menos de un minuto",
+                    excerpt: "Una clave numérica de seis dígitos basta para blindar las cuentas personales contra intentos de robo de identidad.",
+                    author: "Por Clara Méndez · Tecnología",
+                    readTime: "3 min de lectura",
+                    grandpaQuote: "Es como ponerle doble llave a la puerta de calle antes de irse a dormir: lleva cinco segundos y da tranquilidad.",
+                    paragraphs: [
+                        "La seguridad informática cotidiana no requiere programas complicados; la herramienta más efectiva ya viene incluida gratuitamente dentro de nuestras aplicaciones.",
+                        "Al activar la verificación en dos pasos desde el menú Cuenta en WhatsApp, la aplicación solicitará un PIN personal cada vez que se intente registrar el número en otro teléfono."
+                    ]
+                },
+                {
+                    id: 104,
+                    category: "Noticias internacionales",
+                    title: "Bibliotecas y museos europeos digitalizan miles de manuscritos antiguos para consulta libre",
+                    excerpt: "Cualquier persona desde su computadora o teléfono puede explorar mapas, cartas y bocetos históricos en alta definición.",
+                    author: "Por Marta Villalba · Internacionales",
+                    readTime: "3 min de lectura",
+                    grandpaQuote: "Qué maravilla poder asomarse a los libros de hace quinientos años sin moverse del sillón de casa.",
+                    paragraphs: [
+                        "Un consorcio de instituciones culturales europeas puso en línea una plataforma gratuita con más de cincuenta mil documentos históricos restaurados digitalmente.",
+                        "Docentes y estudiantes de todo el mundo ya utilizan el archivo como recurso educativo abierto."
+                    ]
+                },
+                {
+                    id: 105,
+                    category: "Noticias de Argentina",
+                    title: "Plan nacional de bibliotecas populares incorpora nuevos títulos de autores argentinos y talleres de lectura",
+                    excerpt: "Más de mil instituciones barriales recibirán partidas de libros seleccionados y organizarán encuentros abiertos a los vecinos.",
+                    author: "Por Don Aurelio · Redacción Nacional",
+                    readTime: "4 min de lectura",
+                    grandpaQuote: "Una biblioteca abierta en el barrio es una luz encendida que nos hace mejores a todos.",
+                    paragraphs: [
+                        "Bibliotecarios y comisiones directivas de todo el país participaron en la selección de obras de narrativa, historia nacional y divulgación científica.",
+                        "Además de los préstamos a domicilio, se anunciaron ciclos de lectura en voz alta abiertos a toda la comunidad."
+                    ]
+                },
+                {
+                    id: 106,
+                    category: "Economía y finanzas",
+                    title: "Crece el uso de billeteras virtuales en comercios de cercanía gracias a los reintegros inmediatos",
+                    excerpt: "Más del 70% de los almacenes y farmacias ya opera con códigos QR interoperables sin demoras en la acreditación.",
+                    author: "Por Cdor. Héctor Bermúdez · Finanzas",
+                    readTime: "3 min de lectura",
+                    grandpaQuote: "Si el pago llega al instante y sin vueltas, ganan tanto el que compra como el que trabaja detrás del mostrador.",
+                    paragraphs: [
+                        "La digitalización de los pagos cotidianos continúa consolidándose en todo el país, impulsada por promociones bancarias y acreditación instantánea.",
+                        "Para los consumidores, la posibilidad de aprovechar descuentos semanales representa un alivio concreto en el presupuesto del hogar."
+                    ]
+                }
+            ];
+
+            // Estado de la aplicación
+            var selectedCategory = "Todas";
+            var searchText = "";
+            var onlySaved = false;
+            var savedIds = [];
+            var activeArticleId = null;
+            var latestPublishedId = 1;
+            var fontSizes = ["0.98rem", "1.08rem", "1.22rem", "1.36rem"];
+            var fontIndex = 1;
+
+            var INTERVAL_SEC = 15;
+            var secondsLeft = INTERVAL_SEC;
+            var isAutoRunning = true;
+            var timerHandle = null;
+            var toastTimeout = null;
+
+            function getCategoryClass(cat) {
+                if (cat === "Noticias de Argentina") return "pill-argentina";
+                if (cat === "Noticias internacionales") return "pill-internacional";
+                if (cat === "Economía y finanzas") return "pill-economia";
+                if (cat === "Tecnología") return "pill-tecnologia";
+                if (cat === "Deportes") return "pill-deportes";
+                return "pill-argentina";
+            }
+
+            function buildArtworkSVG(cat, large) {
+                var w = large ? 400 : 320;
+                var h = large ? 260 : 170;
+                var cx = w / 2;
+                var cy = h / 2;
+                var config = {
+                    "Noticias de Argentina": {
+                        c1: "#0C4A6E", c2: "#0284C7",
+                        shape: '<circle cx="' + cx + '" cy="' + (cy - 8) + '" r="30" fill="none" stroke="#FDE047" stroke-width="3"/><circle cx="' + cx + '" cy="' + (cy - 8) + '" r="12" fill="#FDE047"/><line x1="' + (cx - 70) + '" y1="' + (cy - 44) + '" x2="' + (cx + 70) + '" y2="' + (cy - 44) + '" stroke="#E0F2FE" stroke-width="3" opacity="0.7"/><line x1="' + (cx - 70) + '" y1="' + (cy + 28) + '" x2="' + (cx + 70) + '" y2="' + (cy + 28) + '" stroke="#E0F2FE" stroke-width="3" opacity="0.7"/>'
+                    },
+                    "Noticias internacionales": {
+                        c1: "#312E81", c2: "#4338CA",
+                        shape: '<circle cx="' + cx + '" cy="' + (cy - 6) + '" r="36" fill="none" stroke="#C7D2FE" stroke-width="2.5"/><ellipse cx="' + cx + '" cy="' + (cy - 6) + '" rx="17" ry="36" fill="none" stroke="#FFFBEB" stroke-width="2"/><line x1="' + (cx - 36) + '" y1="' + (cy - 6) + '" x2="' + (cx + 36) + '" y2="' + (cy - 6) + '" stroke="#FFFBEB" stroke-width="2"/>'
+                    },
+                    "Economía y finanzas": {
+                        c1: "#064E3B", c2: "#047857",
+                        shape: '<polyline points="' + (cx - 50) + ',' + (cy + 24) + ' ' + (cx - 15) + ',' + (cy - 4) + ' ' + (cx + 12) + ',' + (cy + 8) + ' ' + (cx + 52) + ',' + (cy - 34) + '" fill="none" stroke="#FCD34D" stroke-width="4" stroke-linecap="round" stroke-linejoin="round"/><polyline points="' + (cx + 32) + ',' + (cy - 34) + ' ' + (cx + 52) + ',' + (cy - 34) + ' ' + (cx + 52) + ',' + (cy - 14) + '" fill="none" stroke="#FFFBEB" stroke-width="3" stroke-linecap="round"/>'
+                    },
+                    "Tecnología": {
+                        c1: "#1E293B", c2: "#334155",
+                        shape: '<rect x="' + (cx - 30) + '" y="' + (cy - 36) + '" width="60" height="60" rx="10" fill="none" stroke="#93C5FD" stroke-width="2.5"/><rect x="' + (cx - 14) + '" y="' + (cy - 20) + '" width="28" height="28" rx="4" fill="#93C5FD" opacity="0.45"/>'
+                    },
+                    "Deportes": {
+                        c1: "#78350F", c2: "#B45309",
+                        shape: '<circle cx="' + cx + '" cy="' + (cy - 6) + '" r="34" fill="none" stroke="#FDE68A" stroke-width="2.5"/><polygon points="' + cx + ',' + (cy - 24) + ' ' + (cx + 17) + ',' + (cy - 11) + ' ' + (cx + 10) + ',' + (cy + 9) + ' ' + (cx - 10) + ',' + (cy + 9) + ' ' + (cx - 17) + ',' + (cy - 11) + '" fill="none" stroke="#FFFBEB" stroke-width="2.2"/>'
+                    }
+                };
+                var item = config[cat] || config["Noticias de Argentina"];
+                var gid = "g" + Math.floor(Math.random() * 1000000);
+                return '<svg viewBox="0 0 ' + w + ' ' + h + '" preserveAspectRatio="xMidYMid slice">' +
+                    '<defs><linearGradient id="' + gid + '" x1="0%" y1="0%" x2="100%" y2="100%">' +
+                    '<stop offset="0%" stop-color="' + item.c1 + '"/><stop offset="100%" stop-color="' + item.c2 + '"/>' +
+                    '</linearGradient></defs>' +
+                    '<rect width="' + w + '" height="' + h + '" fill="url(#' + gid + ')"/>' +
+                    item.shape +
+                    '<text x="' + cx + '" y="' + (h - 16) + '" text-anchor="middle" fill="#FFFBEB" opacity="0.88" font-family="Georgia, serif" font-size="10" letter-spacing="1.8">' +
+                    cat.toUpperCase() + '</text></svg>';
+            }
+
+            function escapeHTML(str) {
+                return String(str)
+                    .replace(/&/g, "&amp;")
+                    .replace(/</g, "&lt;")
+                    .replace(/>/g, "&gt;")
+                    .replace(/"/g, "&quot;");
+            }
+
+            function setFormattedDate() {
+                try {
+                    var el = document.getElementById("header-date");
+                    if (!el) return;
+                    var now = new Date();
+                    var formatted = now.toLocaleDateString("es-AR", {
+                        weekday: "long",
+                        day: "numeric",
+                        month: "long",
+                        year: "numeric"
+                    });
+                    el.textContent = formatted.charAt(0).toUpperCase() + formatted.slice(1) + " · Buenos Aires";
+                } catch (e) {}
+            }
+
+            function updateCounters() {
+                var cats = [
+                    "Noticias de Argentina",
+                    "Noticias internacionales",
+                    "Economía y finanzas",
+                    "Tecnología",
+                    "Deportes"
+                ];
+                var allEl = document.getElementById("count-Todas");
+                if (allEl) allEl.textContent = articles.length;
+
+                for (var i = 0; i < cats.length; i++) {
+                    var c = cats[i];
+                    var count = 0;
+                    for (var j = 0; j < articles.length; j++) {
+                        if (articles[j].category === c) count++;
+                    }
+                    var badge = document.getElementById("count-" + c);
+                    if (badge) badge.textContent = count;
+                }
+
+                var totalLabel = document.getElementById("total-published-label");
+                if (totalLabel) totalLabel.textContent = articles.length + " noticias publicadas";
+
+                var savedEl = document.getElementById("saved-counter");
+                if (savedEl) savedEl.textContent = savedIds.length;
+
+                var q1 = document.getElementById("queue-counter");
+                var q2 = document.getElementById("queue-modal-count");
+                if (q1) q1.textContent = publishQueue.length;
+                if (q2) q2.textContent = publishQueue.length;
+            }
+
+            function getFilteredArticles() {
+                return articles.filter(function (art) {
+                    if (onlySaved && savedIds.indexOf(art.id) === -1) return false;
+                    if (selectedCategory !== "Todas" && art.category !== selectedCategory) return false;
+                    if (searchText.trim() !== "") {
+                        var q = searchText.toLowerCase();
+                        var haystack = (art.title + " " + art.excerpt + " " + art.category).toLowerCase();
+                        if (haystack.indexOf(q) === -1) return false;
+                    }
+                    return true;
+                });
+            }
+
+            function renderPortal() {
+                updateCounters();
+
+                var filtered = getFilteredArticles();
+                var heroSlot = document.getElementById("hero-slot");
+                var gridEl = document.getElementById("news-grid");
+                var headingEl = document.getElementById("grid-heading");
+                var subheadingEl = document.getElementById("grid-subheading");
+
+                if (!heroSlot || !gridEl) return;
+
+                if (onlySaved) {
+                    headingEl.textContent = "Tus notas guardadas";
+                    subheadingEl.textContent = filtered.length + " nota(s) guardada(s)";
+                } else if (selectedCategory !== "Todas") {
+                    headingEl.textContent = selectedCategory;
+                    subheadingEl.textContent = filtered.length + " noticia(s) en esta sección";
+                } else {
+                    headingEl.textContent = "Últimas noticias publicadas";
+                    subheadingEl.textContent = "Actualización automática en vivo";
+                }
+
+                if (filtered.length === 0) {
+                    heroSlot.innerHTML = "";
+                    gridEl.innerHTML = '<div style="grid-column: 1 / -1; background: var(--paper-card); border: 1px solid var(--border-color); border-radius: 14px; padding: 32px; text-align: center;">' +
+                        '<h3 style="font-family: var(--font-serif); font-size: 1.3rem; margin-bottom: 8px;">No encontramos noticias con ese filtro</h3>' +
+                        '<p style="color: var(--ink-muted); margin-bottom: 14px;">Probá limpiando la búsqueda o volviendo a ver todas las secciones.</p>' +
+                        '<button type="button" class="btn-read" onclick="resetFilters()">Ver todas las noticias</button></div>';
+                    return;
+                }
+
+                // La primera noticia filtrada ocupa la Portada Principal
+                var hero = filtered[0];
+                latestPublishedId = hero.id;
+
+                var tickerEl = document.getElementById("ticker-headline");
+                if (tickerEl && articles.length > 0) {
+                    tickerEl.textContent = articles[0].title + " (" + articles[0].category + ")";
+                }
+
+                heroSlot.innerHTML =
+                    '<article class="hero-card">' +
+                        '<div class="hero-art">' +
+                            buildArtworkSVG(hero.category, true) +
+                            '<div class="hero-badges">' +
+                                '<span class="cat-pill ' + getCategoryClass(hero.category) + '">' + escapeHTML(hero.category) + '</span>' +
+                                (hero.isNew ? '<span class="new-pill">★ Recién publicada</span>' : '<span class="new-pill" style="background:#1A1A1A;">Portada</span>') +
+                            '</div>' +
+                        '</div>' +
+                        '<div class="hero-body">' +
+                            '<div>' +
+                                '<div class="hero-kicker">Edición Central · ' + escapeHTML(hero.timeLabel) + '</div>' +
+                                '<h2 class="hero-title">' + escapeHTML(hero.title) + '</h2>' +
+                                '<p class="hero-excerpt">' + escapeHTML(hero.excerpt) + '</p>' +
+                            '</div>' +
+                            '<div class="grandpa-quote">“El apunte del Abuelo: ' + escapeHTML(hero.grandpaQuote) + '”</div>' +
+                            '<div class="card-footer-row">' +
+                                '<span>' + escapeHTML(hero.author) + ' · ' + escapeHTML(hero.readTime) + '</span>' +
+                                '<button type="button" class="btn-read" onclick="openArticleModal(' + hero.id + ')">Leer nota completa →</button>' +
+                            '</div>' +
+                        '</div>' +
+                    '</article>';
+
+                // Resto de las noticias en grilla
+                var rest = filtered.slice(1);
+                if (rest.length === 0) {
+                    gridEl.innerHTML = "";
+                    return;
+                }
+
+                var htmlCards = "";
+                for (var i = 0; i < rest.length; i++) {
+                    var item = rest[i];
+                    htmlCards +=
+                        '<article class="news-card ' + (item.isNew ? 'is-new-anim' : '') + '">' +
+                            '<div class="card-art">' +
+                                buildArtworkSVG(item.category, false) +
+                                '<div class="card-badges">' +
+                                    '<span class="cat-pill ' + getCategoryClass(item.category) + '">' + escapeHTML(item.category) + '</span>' +
+                                    (item.isNew ? '<span class="new-pill">Recién publicada</span>' : '') +
+                                '</div>' +
+                            '</div>' +
+                            '<div class="card-body">' +
+                                '<div>' +
+                                    '<div class="card-meta-top">' + escapeHTML(item.author) + ' · ' + escapeHTML(item.readTime) + '</div>' +
+                                    '<h3 class="card-title">' + escapeHTML(item.title) + '</h3>' +
+                                    '<p class="card-excerpt">' + escapeHTML(item.excerpt) + '</p>' +
+                                '</div>' +
+                                '<div class="card-footer-row">' +
+                                    '<span>' + escapeHTML(item.timeLabel) + '</span>' +
+                                    '<button type="button" class="btn-read" onclick="openArticleModal(' + item.id + ')">Leer nota completa</button>' +
+                                '</div>' +
+                            '</div>' +
+                        '</article>';
+                }
+                gridEl.innerHTML = htmlCards;
+            }
+
+            function renderQueueList() {
+                var container = document.getElementById("queue-list-container");
+                if (!container) return;
+
+                if (publishQueue.length === 0) {
+                    container.innerHTML = '<p style="color: var(--ink-muted); font-size: 0.9rem;">La cola está vacía. El sistema generará boletines automáticamente o podés redactar uno arriba.</p>';
+                    return;
+                }
+
+                var html = "";
+                for (var i = 0; i < publishQueue.length; i++) {
+                    var q = publishQueue[i];
+                    html +=
+                        '<div class="queue-item">' +
+                            '<div>' +
+                                '<span class="cat-pill ' + getCategoryClass(q.category) + '" style="font-size:0.65rem;">' + escapeHTML(q.category) + '</span>' +
+                                '<div style="font-family: var(--font-serif); font-weight: 700; font-size: 0.95rem; margin-top: 5px;">' + escapeHTML(q.title) + '</div>' +
+                            '</div>' +
+                            '<button type="button" class="btn-read" style="white-space:nowrap;" onclick="publishSpecificFromQueue(' + i + ')">Publicar ya</button>' +
+                        '</div>';
+                }
+                container.innerHTML = html;
+            }
+
+            function showToast(title, articleId) {
+                var toast = document.getElementById("toast-banner");
+                var titleEl = document.getElementById("toast-title");
+                if (!toast || !titleEl) return;
+
+                latestPublishedId = articleId;
+                titleEl.textContent = title;
+                toast.classList.add("show");
+
+                if (toastTimeout) clearTimeout(toastTimeout);
+                toastTimeout = setTimeout(function () {
+                    toast.classList.remove("show");
+                }, 5500);
+            }
+
+            function createFallbackArticle() {
+                var pool = [
+                    {
+                        category: "Noticias de Argentina",
+                        title: "Clubes de barrio y centros de jubilados organizan torneos abiertos de ajedrez y truco",
+                        excerpt: "La propuesta reúne a distintas generaciones durante los fines de semana con entrada libre y merienda compartida.",
+                        grandpaQuote: "Una buena charla entre jugada y jugada vale más que cualquier trofeo.",
+                        paragraphs: [
+                            "Con mesas dispuestas en patios y salones comunitarios, decenas de clubes sociales celebran jornadas abiertas de juegos de mesa.",
+                            "La iniciativa fortalece los lazos vecinales y promueve espacios saludables de encuentro."
+                        ]
+                    },
+                    {
+                        category: "Tecnología",
+                        title: "Consejos sencillos para liberar espacio en el celular sin borrar fotos importantes",
+                        excerpt: "Revisar los videos reenviados en grupos de mensajería permite recuperar memoria en pocos segundos.",
+                        grandpaQuote: "Ordenar el teléfono de vez en cuando es como limpiar los cajones del escritorio.",
+                        paragraphs: [
+                            "La mayoría de los teléfonos llenan su memoria por archivos multimedia duplicados que llegan por mensajería.",
+                            "Ingresando en Ajustes > Almacenamiento dentro de la aplicación se pueden eliminar los videos pesados manteniendo intactas las fotos familiares."
+                        ]
+                    }
+                ];
+                var pick = pool[Math.floor(Math.random() * pool.length)];
+                return {
+                    id: Date.now(),
+                    category: pick.category,
+                    title: pick.title,
+                    excerpt: pick.excerpt,
+                    author: "Por Redacción Automática",
+                    readTime: "3 min de lectura",
+                    grandpaQuote: pick.grandpaQuote,
+                    paragraphs: pick.paragraphs
+                };
+            }
+
+            function publishArticleObject(rawArt) {
+                // Quitar marca de 'nueva' a las anteriores
+                for (var i = 0; i < articles.length; i++) {
+                    articles[i].isNew = false;
+                }
+                var now = new Date();
+                var hh = String(now.getHours()).padStart(2, "0");
+                var mm = String(now.getMinutes()).padStart(2, "0");
+
+                var published = {
+                    id: rawArt.id || Date.now(),
+                    category: rawArt.category,
+                    title: rawArt.title,
+                    excerpt: rawArt.excerpt,
+                    author: rawArt.author || "Por Redacción Automática",
+                    readTime: rawArt.readTime || "3 min de lectura",
+                    timeLabel: "Publicada a las " + hh + ":" + mm,
+                    isNew: true,
+                    grandpaQuote: rawArt.grandpaQuote || "Informarse con calma ayuda a tomar mejores decisiones cada día.",
+                    paragraphs: rawArt.paragraphs || [rawArt.excerpt]
+                };
+
+                articles.unshift(published);
+                secondsLeft = INTERVAL_SEC;
+                updateCountdownUI();
+                renderPortal();
+                renderQueueList();
+                showToast(published.title, published.id);
+            }
+
+            function updateCountdownUI() {
+                var el = document.getElementById("countdown-seconds");
+                if (el) el.textContent = secondsLeft + "s";
+            }
+
+            function startAutoTimer() {
+                if (timerHandle) clearInterval(timerHandle);
+                timerHandle = setInterval(function () {
+                    if (!isAutoRunning) return;
+                    secondsLeft--;
+                    if (secondsLeft <= 0) {
+                        window.publishNextNow();
+                    } else {
+                        updateCountdownUI();
+                    }
+                }, 1000);
+            }
+
+            // =========================================================
+            // FUNCIONES GLOBALES EXPUESTAS AL DOM
+            // =========================================================
+            window.publishNextNow = function () {
+                var next = publishQueue.length > 0 ? publishQueue.shift() : createFallbackArticle();
+                publishArticleObject(next);
+            };
+
+            window.publishSpecificFromQueue = function (index) {
+                if (index < 0 || index >= publishQueue.length) return;
+                var picked = publishQueue.splice(index, 1)[0];
+                publishArticleObject(picked);
+            };
+
+            window.toggleAutoPublish = function () {
+                isAutoRunning = !isAutoRunning;
+                var badge = document.getElementById("live-badge");
+                var label = document.getElementById("live-badge-label");
+                var btn = document.getElementById("btn-toggle-auto");
+
+                if (isAutoRunning) {
+                    if (badge) badge.classList.remove("paused");
+                    if (label) label.textContent = "EN VIVO · PUBLICACIÓN AUTOMÁTICA";
+                    if (btn) btn.textContent = "⏸ Pausar";
+                } else {
+                    if (badge) badge.classList.add("paused");
+                    if (label) label.textContent = "PAUSADO · MODO MANUAL";
+                    if (btn) btn.textContent = "▶ Reanudar";
+                }
+            };
+
+            window.selectCategory = function (cat) {
+                selectedCategory = cat;
+                onlySaved = false;
+                var savedBtn = document.getElementById("btn-saved-filter");
+                if (savedBtn) savedBtn.style.backgroundColor = "";
+
+                var tabs = document.querySelectorAll(".cat-tab");
+                for (var i = 0; i < tabs.length; i++) {
+                    if (tabs[i].getAttribute("data-cat") === cat) {
+                        tabs[i].classList.add("active");
+                    } else {
+                        tabs[i].classList.remove("active");
+                    }
+                }
+                renderPortal();
+            };
+
+            window.handleSearch = function (val) {
+                searchText = val || "";
+                renderPortal();
+            };
+
+            window.toggleSavedFilter = function () {
+                onlySaved = !onlySaved;
+                var btn = document.getElementById("btn-saved-filter");
+                if (btn) {
+                    btn.style.backgroundColor = onlySaved ? "#1A1A1A" : "";
+                    btn.style.color = onlySaved ? "#FAF7F2" : "";
+                }
+                renderPortal();
+            };
+
+            window.resetFilters = function () {
+                selectedCategory = "Todas";
+                searchText = "";
+                onlySaved = false;
+                var input = document.getElementById("search-input");
+                if (input) input.value = "";
+                window.selectCategory("Todas");
+            };
+
+            window.openArticleModal = function (id) {
+                var found = null;
+                for (var i = 0; i < articles.length; i++) {
+                    if (articles[i].id === id) {
+                        found = articles[i];
+                        break;
+                    }
+                }
+                if (!found) return;
+
+                activeArticleId = found.id;
+                found.isNew = false;
+
+                var catBadge = document.getElementById("modal-cat-badge");
+                catBadge.textContent = found.category;
+                catBadge.className = "cat-pill " + getCategoryClass(found.category);
+
+                document.getElementById("modal-meta-info").textContent = found.author + " · " + found.readTime + " · " + found.timeLabel;
+                document.getElementById("modal-article-title").textContent = found.title;
+                document.getElementById("modal-article-subtitle").textContent = found.excerpt;
+                document.getElementById("modal-grandpa-quote").textContent = "“El apunte del Abuelo: " + found.grandpaQuote + "”";
+                document.getElementById("modal-art-box").innerHTML = buildArtworkSVG(found.category, true);
+
+                var bodyEl = document.getElementById("modal-article-body");
+                bodyEl.style.fontSize = fontSizes[fontIndex];
+                var pHtml = "";
+                for (var j = 0; j < found.paragraphs.length; j++) {
+                    pHtml += "<p>" + escapeHTML(found.paragraphs[j]) + "</p>";
+                }
+                bodyEl.innerHTML = pHtml;
+
+                updateModalSaveButton();
+                document.getElementById("reader-modal").classList.add("open");
+                renderPortal();
+            };
+
+            window.openHeroArticle = function () {
+                if (articles.length > 0) {
+                    window.openArticleModal(articles[0].id);
+                }
+            };
+
+            window.openLatestPublishedArticle = function () {
+                var toast = document.getElementById("toast-banner");
+                if (toast) toast.classList.remove("show");
+                window.openArticleModal(latestPublishedId);
+            };
+
+            window.closeReaderModal = function () {
+                document.getElementById("reader-modal").classList.remove("open");
+            };
+
+            window.changeFontSize = function (delta) {
+                fontIndex = Math.max(0, Math.min(fontSizes.length - 1, fontIndex + delta));
+                var bodyEl = document.getElementById("modal-article-body");
+                if (bodyEl) bodyEl.style.fontSize = fontSizes[fontIndex];
+            };
+
+            function updateModalSaveButton() {
+                var btn = document.getElementById("modal-save-btn");
+                if (!btn || activeArticleId === null) return;
+                var isSaved = savedIds.indexOf(activeArticleId) !== -1;
+                btn.textContent = isSaved ? "★ Nota guardada" : "☆ Guardar nota";
+                if (isSaved) btn.classList.add("saved");
+                else btn.classList.remove("saved");
+            }
+
+            window.toggleSaveCurrentArticle = function () {
+                if (activeArticleId === null) return;
+                var idx = savedIds.indexOf(activeArticleId);
+                if (idx === -1) {
+                    savedIds.push(activeArticleId);
+                } else {
+                    savedIds.splice(idx, 1);
+                }
+                updateModalSaveButton();
+                updateCounters();
+                if (onlySaved) renderPortal();
+            };
+
+            window.openQueueModal = function () {
+                renderQueueList();
+                document.getElementById("queue-modal").classList.add("open");
+            };
+
+            window.closeQueueModal = function () {
+                document.getElementById("queue-modal").classList.remove("open");
+            };
+
+            window.closeModalOnBackdrop = function (event, modalId) {
+                if (event.target && event.target.id === modalId) {
+                    document.getElementById(modalId).classList.remove("open");
+                }
+            };
+
+            window.submitCustomArticle = function (event) {
+                event.preventDefault();
+                var cat = document.getElementById("new-art-category").value;
+                var title = document.getElementById("new-art-title").value.trim();
+                var summary = document.getElementById("new-art-summary").value.trim();
+                if (!title || !summary) return;
+
+                var paragraphs = summary.split(/\n+/).filter(function (line) {
+                    return line.trim().length > 0;
+                });
+
+                publishArticleObject({
+                    id: Date.now(),
+                    category: cat,
+                    title: title,
+                    excerpt: paragraphs[0],
+                    author: "Por Redacción del Abuelo · Edición Especial",
+                    readTime: "3 min de lectura",
+                    grandpaQuote: "Una buena noticia compartida a tiempo siempre alegra la jornada.",
+                    paragraphs: paragraphs
+                });
+
+                document.getElementById("new-art-title").value = "";
+                document.getElementById("new-art-summary").value = "";
+                window.closeQueueModal();
+            };
+
+            // Inicialización segura tanto inmediata como en DOMContentLoaded
+            function initApp() {
+                try {
+                    setFormattedDate();
+                    renderPortal();
+                    renderQueueList();
+                    startAutoTimer();
+                } catch (err) {
+                    console.error("Error inicializando Las Noticias del Abuelo:", err);
+                }
+            }
+
+            if (document.readyState === "loading") {
+                document.addEventListener("DOMContentLoaded", initApp);
+            } else {
+                initApp();
+            }
+        })();
+    </script>
+</body>
+</html>
